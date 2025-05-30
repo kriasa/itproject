@@ -1,5 +1,5 @@
 package com.example.leaptrip.network
-
+//Бумбумшакалака
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     // Убедитесь, что IP и порт правильные (без / в конце)
-    private const val BASE_URL = "http://172.20.10.2:8000"
+    private const val BASE_URL = "http://192.168.43.115:8000"
 
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
