@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object FlightApi {
-    private const val BASE_URL = "http://10.0.2.2:8000/" // или ваш сервер
+    private const val BASE_URL = "http://192.168.233.18:8000/" // или ваш сервер
 
     val retrofitService: FlightApiService by lazy {
         Retrofit.Builder()
