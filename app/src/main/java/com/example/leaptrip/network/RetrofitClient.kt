@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     // Убедитесь, что IP и порт правильные (без / в конце)
-    private const val BASE_URL = "http://192.168.43.115:8000"
+    private const val BASE_URL = "http://10.0.2.2:8000"
 
     private val httpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {

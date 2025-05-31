@@ -92,9 +92,9 @@ fun MainScreen(appNavController: NavHostController) {
                 composable("hotels") {
                     HotelSearchScreen(navController = appNavController)
                 }
-//                composable("account") {
-//                    AccountScreen(navController = appNavController)
-//                }
+                composable("account") {
+                    AccountScreen(navController = appNavController)
+                }
             }
         }
     }
