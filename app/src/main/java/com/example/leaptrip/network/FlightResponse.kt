@@ -27,4 +27,3 @@ data class FlightResponse(
     @SerializedName("booking_url")
     val booking_url: String
 )
-

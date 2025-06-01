@@ -8,18 +8,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import com.example.leaptrip.R
-
+import com.example.leaptrip.viewmodel.FlightViewModel
+import androidx.compose.foundation.layout.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun MainScreen(appNavController: NavHostController) {
+fun MainScreen(appNavController: NavHostController, flightViewModel: FlightViewModel) {
     val bottomNavController = rememberNavController()
     val currentBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-    val context = LocalContext.current // ✅ Правильно инициализирован внутри @Composable
+    val context = LocalContext.current
 
     Scaffold(
         bottomBar = {
@@ -36,9 +36,8 @@ fun MainScreen(appNavController: NavHostController) {
                         }
                     },
                     label = { Text("Авиабилеты") },
-                    icon = { Text("✈️") } // Можно даже просто эмодзи или текст
+                    icon = { Text("✈️") }
                 )
-
                 NavigationBarItem(
                     selected = currentRoute == "hotels",
                     onClick = {
@@ -53,7 +52,6 @@ fun MainScreen(appNavController: NavHostController) {
                     label = { Text("Отели") },
                     icon = { Text("🏨") }
                 )
-
                 NavigationBarItem(
                     selected = currentRoute == "account",
                     onClick = {
@@ -68,7 +66,6 @@ fun MainScreen(appNavController: NavHostController) {
                     label = { Text("Аккаунт") },
                     icon = { Text("👤") }
                 )
-
                 NavigationBarItem(
                     selected = false,
                     onClick = {
@@ -80,14 +77,14 @@ fun MainScreen(appNavController: NavHostController) {
                     label = { Text("Чат") },
                     icon = { Text("💬") }
                 )
-
             }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             NavHost(navController = bottomNavController, startDestination = "flightSearch") {
                 composable("flightSearch") {
-                    FlightSearchScreen(navController = appNavController)
+                    // Здесь правильный параметр flightViewModel
+                    FlightSearchScreen(navController = appNavController, flightViewModel = flightViewModel)
                 }
                 composable("hotels") {
                     HotelSearchScreen(navController = appNavController)
@@ -99,7 +96,3 @@ fun MainScreen(appNavController: NavHostController) {
         }
     }
 }
-
-
-
-

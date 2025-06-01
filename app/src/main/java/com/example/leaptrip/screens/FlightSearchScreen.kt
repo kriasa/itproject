@@ -3,103 +3,112 @@ package com.example.leaptrip.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.navigation.NavHostController
+import com.example.leaptrip.viewmodel.FlightViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 
 @Composable
-fun FlightSearchScreen(navController: NavController) {
-    val viewModel: FlightViewModel = viewModel()
-
+fun FlightSearchScreen(
+    navController: NavHostController,
+    flightViewModel: FlightViewModel
+) {
+    // Состояния для полей ввода
     var fromCity by remember { mutableStateOf("") }
     var toCity by remember { mutableStateOf("") }
     var departureDate by remember { mutableStateOf("") }
     var returnDate by remember { mutableStateOf("") }
+    var oneWay by remember { mutableStateOf(false) }
+    var direct by remember { mutableStateOf(false) }
 
-    val flights by viewModel.flights.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-
-    // Обработка успешного поиска
-    LaunchedEffect(flights) {
-        if (flights.isNotEmpty()) {
-            navController.navigate("results") {
-                popUpTo("search") { inclusive = false }
-            }
-        }
-    }
+    val isLoading by flightViewModel.isLoading.collectAsState()
+    val error by flightViewModel.error.collectAsState()
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top
     ) {
         OutlinedTextField(
             value = fromCity,
             onValueChange = { fromCity = it },
-            label = { Text("Город отправления") },
+            label = { Text("Откуда") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
             value = toCity,
             onValueChange = { toCity = it },
-            label = { Text("Город назначения") },
+            label = { Text("Куда") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
             value = departureDate,
             onValueChange = { departureDate = it },
-            label = { Text("Дата отправления (ГГГГ-ММ-ДД)") },
+            label = { Text("Дата вылета (YYYY-MM-DD)") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
             value = returnDate,
             onValueChange = { returnDate = it },
-            label = { Text("Дата возвращения (ГГГГ-ММ-ДД)") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Дата возвращения (опционально)") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !oneWay
         )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = oneWay, onCheckedChange = { oneWay = it })
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("В один конец")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = direct, onCheckedChange = { direct = it })
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Прямые рейсы")
         }
 
-        error?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
-        }
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-                if (fromCity.isNotBlank() && toCity.isNotBlank() && departureDate.isNotBlank()) {
-                    viewModel.searchFlights(
-                        fromCity = fromCity,
-                        toCity = toCity,
-                        departureDate = departureDate,
-                        returnDate = if (returnDate.isNotBlank()) returnDate else null
-                    )
-                } else {
-                    viewModel.setError("Заполните обязательные поля (города и дату отправления)")
-                }
+                flightViewModel.searchFlights(
+                    fromCity = fromCity,
+                    toCity = toCity,
+                    departureDate = departureDate,
+                    returnDate = if (returnDate.isBlank()) null else returnDate,
+                    oneWay = oneWay,
+                    direct = direct
+                )
+                navController.navigate("results")
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            enabled = !isLoading
+            enabled = !isLoading,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Найти рейсы", style = MaterialTheme.typography.labelLarge)
+            Text("Поиск")
+        }
+
+        if (isLoading) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+
+        if (!error.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = error ?: "",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
-
-
-
-
-
-
-

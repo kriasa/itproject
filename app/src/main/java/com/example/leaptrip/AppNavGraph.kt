@@ -1,14 +1,17 @@
 package com.example.leaptrip
 
-
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.leaptrip.screens.*
+import com.example.leaptrip.viewmodel.FlightViewModel
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
+    val flightViewModel: FlightViewModel = viewModel() // создаём один экземпляр ViewModel
+
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
@@ -32,14 +35,12 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-        // Основной экран с нижним меню
         composable("main") {
-            MainScreen(appNavController = navController)
+            MainScreen(appNavController = navController, flightViewModel = flightViewModel)
         }
 
-        // Экраны вне нижнего меню
         composable("results") {
-            FlightResultsScreen(navController = navController)
+            FlightResultsScreen(navController = navController, flightViewModel = flightViewModel)
         }
     }
 }
