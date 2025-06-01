@@ -11,19 +11,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.leaptrip.network.UserApiService
 import com.example.leaptrip.viewmodel.FlightViewModel
 import com.example.leaptrip.viewmodel.HotelViewModel
+import com.example.leaptrip.screens.AccountScreen
+import com.example.leaptrip.network.RetrofitClient // если есть твой Retrofit клиент
 
 @Composable
 fun MainScreen(
     appNavController: NavHostController,
     flightViewModel: FlightViewModel = viewModel(),
-    hotelViewModel: HotelViewModel = viewModel()
+    hotelViewModel: HotelViewModel = viewModel(),
 ) {
     val bottomNavController = rememberNavController()
     val currentBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val context = LocalContext.current
+
+    // Создаём UserApiService через RetrofitClient (или как у тебя там)
+    val userApiService = remember { RetrofitClient.userApiService }
 
     Scaffold(
         bottomBar = {
@@ -114,7 +120,10 @@ fun MainScreen(
                 }
 
                 composable("account") {
-                    AccountScreen(navController = appNavController)
+                    AccountScreen(
+                        navController = appNavController,
+                        userApiService = userApiService
+                    )
                 }
             }
         }

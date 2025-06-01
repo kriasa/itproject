@@ -35,9 +35,9 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-       Text("Вход", style = MaterialTheme.typography.headlineMedium)
+        Text("Вход", style = MaterialTheme.typography.headlineMedium)
 
-     Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = username,
@@ -69,7 +69,7 @@ fun LoginScreen(
                         )
 
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "Успешный вход: ${response.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Успешный вход: ${username}", Toast.LENGTH_SHORT).show()
                             onLoginSuccess() // Переход на главный экран
                         }
                     } catch (e: Exception) {
