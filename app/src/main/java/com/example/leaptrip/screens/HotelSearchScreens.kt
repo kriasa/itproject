@@ -1,139 +1,104 @@
 package com.example.leaptrip.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.leaptrip.viewmodel.HotelViewModel
 
 @Composable
-fun HotelSearchScreen(navController: NavController) {
-    val viewModel: HotelViewModel = viewModel()
-    val error by viewModel.error.collectAsState()
-
+fun HotelSearchScreen(
+    navController: NavHostController,
+    hotelViewModel: HotelViewModel = viewModel()
+) {
     var city by remember { mutableStateOf("") }
     var checkIn by remember { mutableStateOf("") }
     var checkOut by remember { mutableStateOf("") }
     var adults by remember { mutableStateOf("2") }
-    var selectedStars by remember { mutableStateOf<List<Int>>(emptyList()) }
+    var stars by remember { mutableStateOf("") }  // Например "3,4,5"
     var priceMin by remember { mutableStateOf("") }
     var priceMax by remember { mutableStateOf("") }
 
+    val isLoading by hotelViewModel.isLoading.collectAsState()
+    val error by hotelViewModel.error.collectAsState()
+
     Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
     ) {
-        // Основные поля
         OutlinedTextField(
             value = city,
             onValueChange = { city = it },
-            label = { Text("Город") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Город") }
         )
-
-        // Даты заезда/выезда
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = checkIn,
-                onValueChange = { checkIn = it },
-                label = { Text("Заезд (ГГГГ-ММ-ДД)") },
-                modifier = Modifier.weight(1f)
-            )
-            OutlinedTextField(
-                value = checkOut,
-                onValueChange = { checkOut = it },
-                label = { Text("Выезд (ГГГГ-ММ-ДД)") },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Количество гостей
+        OutlinedTextField(
+            value = checkIn,
+            onValueChange = { checkIn = it },
+            label = { Text("Дата заезда (YYYY-MM-DD)") }
+        )
+        OutlinedTextField(
+            value = checkOut,
+            onValueChange = { checkOut = it },
+            label = { Text("Дата выезда (YYYY-MM-DD)") }
+        )
         OutlinedTextField(
             value = adults,
-            onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() }) {
-                    adults = newValue.take(2)
-                }
-            },
-            label = { Text("Количество гостей") },
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = { adults = it.filter { c -> c.isDigit() } },
+            label = { Text("Количество взрослых") }
+        )
+        OutlinedTextField(
+            value = stars,
+            onValueChange = { stars = it },
+            label = { Text("Звезды (через запятую, например: 3,4,5)") }
+        )
+        OutlinedTextField(
+            value = priceMin,
+            onValueChange = { priceMin = it.filter { c -> c.isDigit() } },
+            label = { Text("Мин. цена") }
+        )
+        OutlinedTextField(
+            value = priceMax,
+            onValueChange = { priceMax = it.filter { c -> c.isDigit() } },
+            label = { Text("Макс. цена") }
         )
 
-        // Фильтр по звёздам
-        Text("Звёздность отеля", style = MaterialTheme.typography.labelMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(1, 2, 3, 4, 5).forEach { stars ->
-                FilterChip(
-                    selected = selectedStars.contains(stars),
-                    onClick = {
-                        selectedStars = if (selectedStars.contains(stars)) {
-                            selectedStars - stars
-                        } else {
-                            selectedStars + stars
-                        }
-                    },
-                    label = { Text("$stars★") }
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Фильтр по цене
-        Text("Диапазон цен (₽)", style = MaterialTheme.typography.labelMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = priceMin,
-                onValueChange = { newValue ->
-                    if (newValue.all { it.isDigit() }) {
-                        priceMin = newValue.take(7)
-                    }
-                },
-                label = { Text("От") },
-                modifier = Modifier.weight(1f)
-            )
-            OutlinedTextField(
-                value = priceMax,
-                onValueChange = { newValue ->
-                    if (newValue.all { it.isDigit() }) {
-                        priceMax = newValue.take(7)
-                    }
-                },
-                label = { Text("До") },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // Отображение ошибок
-        error?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-
-        // Кнопка поиска
         Button(
             onClick = {
-                viewModel.searchHotels(
+                val starsList = stars.split(",").mapNotNull {
+                    val num = it.trim().toIntOrNull()
+                    if (num != null) num else null
+                }.takeIf { it.isNotEmpty() }
+
+                hotelViewModel.searchHotels(
                     city = city,
                     checkIn = checkIn,
                     checkOut = checkOut,
                     adults = adults.toIntOrNull() ?: 2,
-                    stars = selectedStars.takeIf { it.isNotEmpty() },
-                    priceMin = priceMin.takeIf { it.isNotEmpty() }?.toIntOrNull(),
-                    priceMax = priceMax.takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    stars = starsList,
+                    priceMin = priceMin.toIntOrNull(),
+                    priceMax = priceMax.toIntOrNull()
                 )
                 navController.navigate("hotelResults")
             },
-            modifier = Modifier.fillMaxWidth()
+            enabled = !isLoading
         ) {
-            Text("Найти отели")
+            Text("Поиск")
+        }
+
+        if (isLoading) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator()
+        }
+
+        if (error != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = error ?: "", color = MaterialTheme.colorScheme.error)
         }
     }
 }

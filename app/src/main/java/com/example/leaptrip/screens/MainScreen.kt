@@ -8,14 +8,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.leaptrip.viewmodel.FlightViewModel
-import androidx.compose.foundation.layout.*
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.leaptrip.viewmodel.HotelViewModel
 
 @Composable
-fun MainScreen(appNavController: NavHostController, flightViewModel: FlightViewModel) {
+fun MainScreen(
+    appNavController: NavHostController,
+    flightViewModel: FlightViewModel = viewModel(),
+    hotelViewModel: HotelViewModel = viewModel()
+) {
     val bottomNavController = rememberNavController()
     val currentBackStackEntry by bottomNavController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
@@ -82,13 +86,33 @@ fun MainScreen(appNavController: NavHostController, flightViewModel: FlightViewM
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             NavHost(navController = bottomNavController, startDestination = "flightSearch") {
+
                 composable("flightSearch") {
-                    // Здесь правильный параметр flightViewModel
-                    FlightSearchScreen(navController = appNavController, flightViewModel = flightViewModel)
+                    FlightSearchScreen(
+                        navController = appNavController,
+                        flightViewModel = flightViewModel
+                    )
                 }
+                composable("flightResults") {
+                    FlightResultsScreen(
+                        navController = appNavController,
+                        flightViewModel = flightViewModel
+                    )
+                }
+
                 composable("hotels") {
-                    HotelSearchScreen(navController = appNavController)
+                    HotelSearchScreen(
+                        navController = appNavController,
+                        hotelViewModel = hotelViewModel
+                    )
                 }
+                composable("hotelResults") {
+                    HotelResultsScreen(
+                        navController = appNavController,
+                        hotelViewModel = hotelViewModel
+                    )
+                }
+
                 composable("account") {
                     AccountScreen(navController = appNavController)
                 }
