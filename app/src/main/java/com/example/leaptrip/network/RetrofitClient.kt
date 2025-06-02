@@ -33,7 +33,7 @@ class CookieInterceptor : Interceptor {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8000"
+    private const val BASE_URL = "http://192.168.233.18:8000"
 
     private val cookieJar = SimpleCookieJar()
     private val cookieManager = CookieManager().apply {
